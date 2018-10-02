@@ -1,5 +1,5 @@
 $(document).ready(function() {
-
+	//Setup assets
     var assets = {
         'skierCrash' : 'img/skier_crash.png',
         'skierLeft' : 'img/skier_left.png',
@@ -14,17 +14,18 @@ $(document).ready(function() {
     };
     var loadedAssets = {};
 
+	//Establish obstacle types
     var obstacleTypes = [
         'tree',
         'treeCluster',
         'rock1',
         'rock2'
     ];
-
     var obstacles = [];
 
     var gameWidth = window.innerWidth;
     var gameHeight = window.innerHeight;
+	//Configure drawable canvas
     var canvas = $('<canvas></canvas>')
         .attr('width', gameWidth * window.devicePixelRatio)
         .attr('height', gameHeight * window.devicePixelRatio)
@@ -35,19 +36,23 @@ $(document).ready(function() {
     $('body').append(canvas);
     var ctx = canvas[0].getContext('2d');
 
-    var skierDirection = 5;
+    var skier = new Skier();
+    var rhino = new Rhino();
+
+/*    var skierDirection = 5;
     var skierMapX = 0;
     var skierMapY = 0;
     var skierSpeed = 8;
+*/
 
     var clearCanvas = function() {
         ctx.clearRect(0, 0, gameWidth, gameHeight);
     };
 
-    var moveSkier = function() {
+/*    var moveSkier = function() {
         switch(skierDirection) {
             case 2:
-                skierMapX -= Math.round(skierSpeed / 1.4142);
+                skierMapX -= Math.round(skierSpeed / 1.4142);	//TODO why is this rounded and case 4 isn't?
                 skierMapY += Math.round(skierSpeed / 1.4142);
 
                 placeNewObstacle(skierDirection);
@@ -64,9 +69,9 @@ $(document).ready(function() {
                 placeNewObstacle(skierDirection);
                 break;
         }
-    };
+    };*/
 
-    var getSkierAsset = function() {
+/*    var getSkierAsset = function() {
         var skierAssetName;
         switch(skierDirection) {
             case 0:
@@ -90,18 +95,18 @@ $(document).ready(function() {
         }
 
         return skierAssetName;
-    };
+    };*/
 
-    var drawSkier = function() {
+/*    var drawSkier = function() {
         var skierAssetName = getSkierAsset();
         var skierImage = loadedAssets[skierAssetName];
         var x = (gameWidth - skierImage.width) / 2;
         var y = (gameHeight - skierImage.height) / 2;
 
         ctx.drawImage(skierImage, x, y, skierImage.width, skierImage.height);
-    };
+    };*/
 
-    var drawObstacles = function() {
+/*    var drawObstacles = function() {
         var newObstacles = [];
 
         _.each(obstacles, function(obstacle) {
@@ -119,8 +124,9 @@ $(document).ready(function() {
         });
 
         obstacles = newObstacles;
-    };
+    };*/
 
+    //TODO Keep this function. Just use randoms to generate an array of item objects
     var placeInitialObstacles = function() {
         var numberObstacles = Math.ceil(_.random(5, 7) * (gameWidth / 800) * (gameHeight / 500));
 
@@ -139,6 +145,8 @@ $(document).ready(function() {
         });
     };
 
+    //TODO this seems to be placing an obstacle based on the direction of the skier...
+    //Either way, keep this function
     var placeNewObstacle = function(direction) {
         var shouldPlaceObstacle = _.random(1, 8);
         if(shouldPlaceObstacle !== 8) {
@@ -174,6 +182,7 @@ $(document).ready(function() {
         }
     };
 
+    //TODO replace this function with instantiation of new objects
     var placeRandomObstacle = function(minX, maxX, minY, maxY) {
         var obstacleIndex = _.random(0, obstacleTypes.length - 1);
 
@@ -186,6 +195,7 @@ $(document).ready(function() {
         })
     };
 
+    //This stays here
     var calculateOpenPosition = function(minX, maxX, minY, maxY) {
         var x = _.random(minX, maxX);
         var y = _.random(minY, maxY);
@@ -205,14 +215,15 @@ $(document).ready(function() {
         }
     };
 
+    //TODO not sure exactly where this should live yet.
     var checkIfSkierHitObstacle = function() {
-        var skierAssetName = getSkierAsset();
+        var skierAssetName = skier.getAssetName();
         var skierImage = loadedAssets[skierAssetName];
         var skierRect = {
             left: skierMapX + gameWidth / 2,
-            right: skierMapX + skierImage.width + gameWidth / 2,
-            top: skierMapY + skierImage.height - 5 + gameHeight / 2,
-            bottom: skierMapY + skierImage.height + gameHeight / 2
+            right: skierMapX + skier.imageWidth + gameWidth / 2,
+            top: skierMapY + skier.imageHeight - 5 + gameHeight / 2,
+            bottom: skierMapY + skier.imageHeight + gameHeight / 2
         };
 
         var collision = _.find(obstacles, function(obstacle) {
@@ -232,6 +243,7 @@ $(document).ready(function() {
         }
     };
 
+    //TODO not sure exactly what this is for
     var intersectRect = function(r1, r2) {
         return !(r2.left > r1.right ||
             r2.right < r1.left ||
@@ -248,7 +260,7 @@ $(document).ready(function() {
 
         clearCanvas();
 
-        moveSkier();
+        skier.move();
 
         checkIfSkierHitObstacle();
 
@@ -261,6 +273,7 @@ $(document).ready(function() {
         requestAnimationFrame(gameLoop);
     };
 
+    //TODO I think this function should remain unchanged
     var loadAssets = function() {
         var assetPromises = [];
 
@@ -283,32 +296,33 @@ $(document).ready(function() {
         return $.when.apply($, assetPromises);
     };
 
+    //Todo add Konami code mode
     var setupKeyhandler = function() {
         $(window).keydown(function(event) {
             switch(event.which) {
                 case 37: // left
-                    if(skierDirection === 1) {
-                        skierMapX -= skierSpeed;
-                        placeNewObstacle(skierDirection);
+                    if(skier.status === 1) {
+                        skier.x -= skier.speed
+                        placeNewObstacle(skier.status);
                     }
                     else {
-                        skierDirection--;
+                        skier.status--;
                     }
                     event.preventDefault();
                     break;
                 case 39: // right
-                    if(skierDirection === 5) {
-                        skierMapX += skierSpeed;
-                        placeNewObstacle(skierDirection);
+                    if(skier.status === 5) {
+                        skier.x += skier.speed;
+                        placeNewObstacle(skier.status);
                     }
                     else {
-                        skierDirection++;
+                        skier.status++;
                     }
                     event.preventDefault();
                     break;
                 case 38: // up
-                    if(skierDirection === 1 || skierDirection === 5) {
-                        skierMapY -= skierSpeed;
+                    if(skier.status === 1 || skier.status === 5) {
+                        skier.y -= skier.speed;
                         placeNewObstacle(6);
                     }
                     event.preventDefault();
