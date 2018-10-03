@@ -1,6 +1,6 @@
 $(document).ready(function() {
 	//Setup assets
-    var assets = {
+  /*  var assets = {
         'skierCrash' : 'img/skier_crash.png',
         'skierLeft' : 'img/skier_left.png',
         'skierLeftDown' : 'img/skier_left_down.png',
@@ -11,7 +11,7 @@ $(document).ready(function() {
         'treeCluster' : 'img/tree_cluster.png',
         'rock1' : 'img/rock_1.png',
         'rock2' : 'img/rock_2.png'
-    };
+    };*/
     var loadedAssets = {};
 
 	//Establish obstacle types
@@ -49,6 +49,7 @@ $(document).ready(function() {
         ctx.clearRect(0, 0, gameWidth, gameHeight);
     };
 
+    skier.move()
 /*    var moveSkier = function() {
         switch(skierDirection) {
             case 2:
@@ -97,22 +98,27 @@ $(document).ready(function() {
         return skierAssetName;
     };*/
 
-/*    var drawSkier = function() {
-        var skierAssetName = getSkierAsset();
-        var skierImage = loadedAssets[skierAssetName];
-        var x = (gameWidth - skierImage.width) / 2;
-        var y = (gameHeight - skierImage.height) / 2;
+    var drawSkier = function() {
+        var skierImage = loadedAssets[skier.getAssetName()];
+        var x = (gameWidth - skier.imageWidth) / 2;
+        var y = (gameHeight - skier.imageHeight) / 2;
 
-        ctx.drawImage(skierImage, x, y, skierImage.width, skierImage.height);
-    };*/
+        alert('SKIER - x: ' + x + '; y: ' + y + '; width: ' + skier.imageWidth + '; height: ' + skier.imageHeight);
+        if (skierImage != null) {
+          ctx.drawImage(skierImage, x, y, skier.imageWidth, skier.imageHeight);
+        } else {
+          console.log("Error: Image asset '" + skier.getAssetName() + "' not found.");
+        }
+    };
 
-/*    var drawObstacles = function() {
+    var drawObstacles = function() {
         var newObstacles = [];
 
         _.each(obstacles, function(obstacle) {
             var obstacleImage = loadedAssets[obstacle.type];
-            var x = obstacle.x - skierMapX - obstacleImage.width / 2;
-            var y = obstacle.y - skierMapY - obstacleImage.height / 2;
+            alert('OBSTACLE - x: ' + obstacle.x + '; y: ' + obstacle.y + '; width: ' + obstacleImage.width + '; height: ' + obstacleImage.height);
+            var x = obstacle.x - skier.x - obstacleImage.width / 2;
+            var y = obstacle.y - skier.y - obstacleImage.height / 2;
 
             if(x < -100 || x > gameWidth + 50 || y < -100 || y > gameHeight + 50) {
                 return;
@@ -124,7 +130,7 @@ $(document).ready(function() {
         });
 
         obstacles = newObstacles;
-    };*/
+    };
 
     //TODO Keep this function. Just use randoms to generate an array of item objects
     var placeInitialObstacles = function() {
@@ -153,10 +159,10 @@ $(document).ready(function() {
             return;
         }
 
-        var leftEdge = skierMapX;
-        var rightEdge = skierMapX + gameWidth;
-        var topEdge = skierMapY;
-        var bottomEdge = skierMapY + gameHeight;
+        var leftEdge = skier.x;
+        var rightEdge = skier.x + gameWidth;
+        var topEdge = skier.y;
+        var bottomEdge = skier.y + gameHeight;
 
         switch(direction) {
             case 1: // left
@@ -216,14 +222,14 @@ $(document).ready(function() {
     };
 
     //TODO not sure exactly where this should live yet.
-    var checkIfSkierHitObstacle = function() {
+/*    var checkIfSkierHitObstacle = function() {
         var skierAssetName = skier.getAssetName();
         var skierImage = loadedAssets[skierAssetName];
         var skierRect = {
-            left: skierMapX + gameWidth / 2,
-            right: skierMapX + skier.imageWidth + gameWidth / 2,
-            top: skierMapY + skier.imageHeight - 5 + gameHeight / 2,
-            bottom: skierMapY + skier.imageHeight + gameHeight / 2
+            left: skier.x + gameWidth / 2,
+            right: skier.x + skier.imageWidth + gameWidth / 2,
+            top: skier.y + skier.imageHeight - 5 + gameHeight / 2,
+            bottom: skier.y + skier.imageHeight + gameHeight / 2
         };
 
         var collision = _.find(obstacles, function(obstacle) {
@@ -242,14 +248,16 @@ $(document).ready(function() {
             skierDirection = 0;
         }
     };
+*/
 
-    //TODO not sure exactly what this is for
-    var intersectRect = function(r1, r2) {
+    //TODO not sure where this should live
+/*    var intersectRect = function(r1, r2) {
         return !(r2.left > r1.right ||
             r2.right < r1.left ||
             r2.top > r1.bottom ||
             r2.bottom < r1.top);
     };
+*/
 
     var gameLoop = function() {
 
@@ -262,9 +270,13 @@ $(document).ready(function() {
 
         skier.move();
 
-        checkIfSkierHitObstacle();
+        skier.detectCollision();
 
-        drawSkier();
+        for(ii = 0; ii < obstacles.length - 1; ii++)
+          drawSkier(obstacles[ii], gameWidth);
+
+        //for(ii = 0; ii < obstacles.length - 1; ii++)
+        //  obstacles[ii].draw();
 
         drawObstacles();
 
@@ -278,6 +290,7 @@ $(document).ready(function() {
         var assetPromises = [];
 
         _.each(assets, function(asset, assetName) {
+          alert(asset);
             var assetImage = new Image();
             var assetDeferred = new $.Deferred();
 

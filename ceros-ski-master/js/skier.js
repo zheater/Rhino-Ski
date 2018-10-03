@@ -1,15 +1,11 @@
 class Skier extends Item {
 
   constructor() {
-    super('skier');
+    super('skierRight');
     this.konamiMode = 0;
     this.points = 0;
     this.status = 5;
     this.speed = 8;
-    this.x = 0;
-    this.y = 0;
-    this.imageWidth = 0;
-    this.imageHeight = 0;
     this.lives = 3;
   }
 
@@ -38,35 +34,32 @@ class Skier extends Item {
     return skierAssetName;
   }
 
-  draw () {
-      var skierAssetName = getSkierAsset();
-      var skierImage = loadedAssets[skierAssetName];
-      var x = (gameWidth - this.imageWidth) / 2;
-      var y = (gameHeight - this.imageHeight) / 2;
-
-      ctx.drawImage(skierImage, x, y, this.imageWidth, this.imageHeight);
-  }
-
   move () {
+    var xDelta = 0;
+    var yDelta = 0;
+
     switch(this.status) {
         case 2:
-            this.x -= Math.round(skierSpeed / 1.4142);	//TODO why is this rounded and case 4 isn't?
-            this.y += Math.round(skierSpeed / 1.4142);
+            xDelta = (-1) * Math.round(skierSpeed / 1.4142);	//TODO why is this rounded and case 4 isn't?
+            yDelta = Math.round(skierSpeed / 1.4142);
 
             placeNewObstacle(skierDirection);
             break;
         case 3:
-            this.y += skierSpeed;
+            yDelta += skierSpeed;
 
             placeNewObstacle(skierDirection);
             break;
         case 4:
-            this.x += skierSpeed / 1.4142;
-            this.y += skierSpeed / 1.4142;
+            xDelta = skierSpeed / 1.4142;
+            yDelta = skierSpeed / 1.4142;
 
             placeNewObstacle(skierDirection);
             break;
     }
+    this.x += xDelta;
+    this.y += yDelta;
+    this.points += yDelta;
   }
 
   hitObstacle () {
