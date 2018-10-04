@@ -6,4 +6,8 @@ class Rhino extends Item {
     this.speed = 10;
     this.maxTurn = 1; //TODO calibrate this
   }
+
+  moveToward(target) {
+
+  }
 }

@@ -5,11 +5,11 @@ class Skier extends Item {
     this.konamiMode = 0;
     this.points = 0;
     this.status = 5;
-    this.speed = 8;
-    this.lives = 3;
+    this.speed = SKIER_SPEED;
+    this.lives = SKIER_LIVES;
   }
 
-  getAssetName () {
+  getAssetName () { //TODO write asset name to member variable... There shouldn't get a "get" so much as an "update".
     var skierAssetName;
     switch(this.status) {
         case 0:
@@ -40,21 +40,21 @@ class Skier extends Item {
 
     switch(this.status) {
         case 2:
-            xDelta = (-1) * Math.round(skierSpeed / 1.4142);	//TODO why is this rounded and case 4 isn't?
-            yDelta = Math.round(skierSpeed / 1.4142);
+            xDelta = (-1) * Math.round(this.speed / 1.4142);	//TODO why is this rounded and case 4 isn't?
+            yDelta = Math.round(this.speed / 1.4142);
 
-            placeNewObstacle(skierDirection);
+//            placeNewObstacle(skierDirection);
             break;
         case 3:
-            yDelta += skierSpeed;
+            yDelta += this.speed;
 
-            placeNewObstacle(skierDirection);
+//            placeNewObstacle(skierDirection);
             break;
         case 4:
-            xDelta = skierSpeed / 1.4142;
-            yDelta = skierSpeed / 1.4142;
+            xDelta = this.speed / 1.4142;
+            yDelta = this.speed / 1.4142;
 
-            placeNewObstacle(skierDirection);
+//            placeNewObstacle(skierDirection);
             break;
     }
     this.x += xDelta;
@@ -89,6 +89,17 @@ class Skier extends Item {
 
     if(collision) {
         skierDirection = 0;
+    }
+  }
+
+  toggleKonami() {
+    this.konamiMode = !this.konamiMode;
+
+    if (this.konamiMode)
+    {
+      this.speed = 2 * SKIER_SPEED;
+    } else {
+      this.speed = SKIER_SPEED;
     }
   }
 };
