@@ -11,37 +11,37 @@ class Item {
     this.y = 0;
     this.imageWidth = 27;
     this.imageHeight = 23;
+    this.moveable = true; //By default items WILL move within viewport
   }
 
-  detectCollision (target, gameWidth) {
+  detectCollision (target) {
     if (typeof target == 'undefined' || !(typeof target.x !== 'undefined' && typeof target.y !== 'undefined' && typeof target.imageWidth !== 'undefined' && typeof target.imageHeight !== 'undefined'))
     {
       console.log('Error: Invalid argument provided to detectCollision for ' + this.assetName);
       return false;
     }
 
+    if (this.konamiMode)
+      return false;
+
     var itemRect = {
-        left: this.x + gameWidth / 2,
-        right: this.x + this.imageWidth + gameWidth / 2,
-        top: this.y + this.imageHeight - 5 + gameHeight / 2, //TODO what's with the 5? hard code
-        bottom: this.y + this.imageHeight + gameHeight / 2
+        left: this.x - this.imageWidth / 2,
+        right: this.x + this.imageWidth / 2,
+        bottom: this.y - this.imageHeight / 2,
+        top: this.y + this.imageHeight / 2
     };
 
-    var obstacleRect = {
-        left: target.x,
-        right: target.x + target.imageWidth,
-        top: target.y + target.imageHeight - 5, //TODO what's with the 5? hard code
-        bottom: tartget.y + target.imageHeight
+    var targetRect = {
+        left: target.x - target.imageWidth / 2,
+        right: target.x + target.imageWidth / 2,
+        top: target.y - target.imageHeight / 2,
+        bottom: target.y + target.imageHeight / 2
     };
 
-    return !( obstacleRect.left > itemRect.right ||
-              obstacleRect.right < itemRect.left ||
-              obstacleRect.top > itemRect.bottom ||
-              obstacleRect.bottom < itemRect.top);
 
-  }
-
-  if(collision) {
-      skierDirection = 0; //TODO what's this??
+    return !( targetRect.left > itemRect.right ||
+              targetRect.right < itemRect.left ||
+              targetRect.top > itemRect.bottom ||
+              targetRect.bottom < itemRect.top);
   }
 }

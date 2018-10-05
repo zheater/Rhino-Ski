@@ -7,9 +7,16 @@ class Skier extends Item {
     this.status = 5;
     this.speed = SKIER_SPEED;
     this.lives = SKIER_LIVES;
+
+    //Skier stays pegged in the center.
+    this.x = (gameWidth - this.imageWidth) / 2;
+    this.y = (gameHeight - this.imageHeight) / 2;
+    this.xMap = 0;
+    this.yMap = 0;
+    this.moveable = false;  //Skier stays pegged in the center of viewport
   }
 
-  getAssetName () { //TODO write asset name to member variable... There shouldn't get a "get" so much as an "update".
+  getAssetName () { //TODO write asset name to member variable... There shouldn't be a "get" so much as an "update".
     var skierAssetName;
     switch(this.status) {
         case 0:
@@ -42,54 +49,18 @@ class Skier extends Item {
         case 2:
             xDelta = (-1) * Math.round(this.speed / 1.4142);	//TODO why is this rounded and case 4 isn't?
             yDelta = Math.round(this.speed / 1.4142);
-
-//            placeNewObstacle(skierDirection);
             break;
         case 3:
             yDelta += this.speed;
-
-//            placeNewObstacle(skierDirection);
             break;
         case 4:
             xDelta = this.speed / 1.4142;
             yDelta = this.speed / 1.4142;
-
-//            placeNewObstacle(skierDirection);
             break;
     }
-    this.x += xDelta;
-    this.y += yDelta;
+    this.xMap += xDelta;
+    this.yMap += yDelta;
     this.points += yDelta;
-  }
-
-  hitObstacle () {
-    if (this.konamiMode)
-      return false;
-
-    var skierAssetName = getSkierAsset();
-    var skierImage = loadedAssets[skierAssetName];
-    var skierRect = {
-        left: skierMapX + gameWidth / 2,
-        right: skierMapX + this.imageWidth + gameWidth / 2,
-        top: skierMapY + this.imageHeight - 5 + gameHeight / 2,
-        bottom: skierMapY + this.imageHeight + gameHeight / 2
-    };
-
-    var collision = _.find(obstacles, function(obstacle) {
-        var obstacleImage = loadedAssets[obstacle.type];
-        var obstacleRect = {
-            left: obstacle.x,
-            right: obstacle.x + obstacleImage.width,
-            top: obstacle.y + obstacleImage.height - 5,
-            bottom: obstacle.y + obstacleImage.height
-        };
-
-        return intersectRect(skierRect, obstacleRect);
-    });
-
-    if(collision) {
-        skierDirection = 0;
-    }
   }
 
   toggleKonami() {
@@ -100,6 +71,50 @@ class Skier extends Item {
       this.speed = 2 * SKIER_SPEED;
     } else {
       this.speed = SKIER_SPEED;
+    }
+  }
+
+  setStatus(newStatus) {
+    if (newStatus < 0 || newStatus > SKIER_STATUS_COUNT) {
+      console.log('Error: Invalid status provided to Skier setStatus()')
+      return false;
+    }
+
+    this.status = newStatus;
+    switch(newStatus) {
+        case 0:
+            this.assetName = 'skierCrash';
+            break;
+        case 1:
+            this.assetName = 'skierLeft';
+            break;
+        case 2:
+            this.assetName = 'skierLeftDown';
+            break;
+        case 3:
+            this.assetName = 'skierDown';
+            break;
+        case 4:
+            this.assetName = 'skierRightDown';
+            break;
+        case 5:
+            this.assetName = 'skierRight';
+            break;
+        case 6:
+            this.assetName = 'skierJump1';
+            break;
+        case 7:
+            this.assetName = 'skierJump2';
+            break;
+        case 8:
+            this.assetName = 'skierJump3';
+            break;
+        case 9:
+            this.assetName = 'skierJump4';
+            break;
+        case 10:
+            this.assetName = 'skierJump5';
+            break;
     }
   }
 };
