@@ -41,11 +41,23 @@ var obstacleTypes = [
 var DIFFICULTY = 10; //Inversely proportional at the moment...
 var RANDMIN = 1;
 var RANDMAX = 100;
+var JUMP_PROBABILITY = 10;
 
 //Skier default settings
 SKIER_LIVES = 3;
 SKIER_SPEED = 8;
-
+SKIER_STATUS_COUNT = 11;
+SKIER_CRASH = 0;
+SKIER_LEFT = 1;
+SKIER_LEFT_DOWN = 2;
+SKIER_DOWN = 3;
+SKIER_RIGHT_DOWN = 4;
+SKIER_RIGHT = 5;
+SKIER_JUMP_1 = 6;
+SKIER_JUMP_2 = 7;
+SKIER_JUMP_3 = 8;
+SKIER_JUMP_4 = 9;
+SKIER_JUMP_5 = 10;
 
 //Establish client-specific game dimensions
 var gameWidth = window.innerWidth;
@@ -53,5 +65,5 @@ var gameHeight = window.innerHeight;
 
 //Instantiate Konami Array and checker Array
 var keySequence = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-var konami = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13];
+var konami = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13];  //Up, Up, Down, Down, Left, Right, Left, Right, b, a, Enter
 var konamiLength = konami.length;
