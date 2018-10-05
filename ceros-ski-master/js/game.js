@@ -1,8 +1,23 @@
+//TODO add skier POINTS
+//TODO fix rhino
+//TODO stop hardcoding item image sizes
+//TODO find a better rhino video
+//TODO difficulty is broken
+//TODO fix collision detection
+//TODO Cleanup
+//TODO deal with nested call bug (as is it's just commented out)
+//TODO update rhino assets based on angle
+//TODO add jumps
+//TODO add skier jump capability
+//TODO fix straight left and right
+//TODO remove all TODOs
+//TODO add any error checks I missed
 $(document).ready(function() {
     var loadedAssets = {};    //Array for asset images
     var obstacles = [];       //Array for instantiated obstacles
     var skier = new Skier();  //Instantiate skier
-    var rhino = new Rhino();  //Instantiate rhino
+    //TODO randomize instantiation of rhino
+    var rhino = new Rhino();  //Instantiate tank puppy
 
 	  //Configure drawable canvas
     var canvas = $('<canvas></canvas>')
@@ -13,61 +28,32 @@ $(document).ready(function() {
             height: gameHeight + 'px'
         });
     $('body').append(canvas);
-    $('body').append('POINTS: ' + skier.points);
+//    $('body').append('POINTS: ' + skier.points); TODO Fix this
     var ctx = canvas[0].getContext('2d');
 
     var clearCanvas = function() {
         ctx.clearRect(0, 0, gameWidth, gameHeight);
     };
 
-    skier.move(); //TODO does this need to be here?
+    var drawItem = function (item) {
+      itemImage = loadedAssets[item.assetName];
 
-    var drawSkier = function() {
-        var skierImage = loadedAssets[skier.getAssetName()];
+      if (item.moveable) {
+        x = item.x - skier.xMap;
+        y = item.y - skier.yMap;
+      } else {
+        x = item.x;
+        y = item.y;
+      }
 
-        //Skier stays pegged in the center.
-        var x = (gameWidth - skier.imageWidth) / 2;
-        var y = (gameHeight - skier.imageHeight) / 2;
-
-        skier.imageWidth = skierImage.width;
-        skier.imageHeight = skierImage.height;
-
-        //alert('SKIER - x: ' + x + '; y: ' + y + '; width: ' + skier.imageWidth + '; height: ' + skier.imageHeight);
-        if (skierImage != null) {
-          ctx.drawImage(skierImage, x, y, skier.imageWidth, skier.imageHeight);
-        } else {
-          console.log("Error: Asset image of type '" + skier.getAssetName() + "' not found.");
-        }
-    };
-
-
-    var drawObstacles = function() {
-            var newObstacles = [];
-
-            _.each(obstacles, function(obstacle) {
-
-                var obstacleImage = loadedAssets[obstacle.assetName];
-                if (typeof obstacleImage == 'undefined') {
-                  console.log("Error: Asset image of type '" + obstacle.assetName + "' not found.");
-                } else {
-                  obstacle.width = obstacleImage.width;
-                  obstacle.height = obstacleImage.height;
-
-                  var x = obstacle.x - skier.x - obstacle.width / 2;
-                  var y = obstacle.y - skier.y - obstacle.height / 2;
-
-                  if(x < -100 || x > gameWidth + 50 || y < -100 || y > gameHeight + 50) { //Checking for out of viewport obstacles to be removed from obstacles array
-                      return;
-                  }
-
-                  ctx.drawImage(obstacleImage, x, y, obstacle.width, obstacle.height);
-
-                  newObstacles.push(obstacle);
-                }
-            });
-
-            obstacles = newObstacles;
-        };
+      if (itemImage != null) {
+        item.imageWidth = itemImage.width;
+        item.imageHeight = itemImage.height;
+        ctx.drawImage(itemImage, x, y, item.imageWidth, item.imageHeight);
+      } else {
+        console.log("Error: Asset image of type '" + item.assetName + "' not found.");
+      }
+    }
 
     //TODO Keep this function. Just use randoms to generate an array of item objects
     var placeInitialObstacles = function() {
@@ -91,10 +77,10 @@ $(document).ready(function() {
     //TODO this seems to be placing an obstacle based on the direction of the skier...
     //Either way, keep this function
     var placeNewObstacle = function(direction) {
-        var leftEdge = skier.x;
-        var rightEdge = skier.x + gameWidth;
-        var topEdge = skier.y;
-        var bottomEdge = skier.y + gameHeight;
+        var leftEdge = skier.xMap;
+        var rightEdge = skier.xMap + gameWidth;
+        var topEdge = skier.yMap;
+        var bottomEdge = skier.yMap + gameHeight;
 
         switch(direction) {
             case 1: // left
@@ -121,19 +107,23 @@ $(document).ready(function() {
     };
 
     //TODO replace this function with instantiation of new objects
+    //TODO replace this with placeObstacle and have the functino accept an item types
     var placeRandomObstacle = function(minX, maxX, minY, maxY) {
-        var obstacleIndex = _.random(0, obstacleTypes.length - 1);
-
+        if (JUMP_PROBABILITY >= _.random(0, RANDMAX))
+        {
+          obstacle = new Item('jumpRamp');
+        } else {
+          var obstacleIndex = _.random(0, obstacleTypes.length - 1);
+          obstacle = new Item(obstacleTypes[obstacleIndex]);
+        }
         var position = calculateOpenPosition(minX, maxX, minY, maxY);
-
-        obstacle = new Item(obstacleTypes[obstacleIndex]);
         obstacle.x = position.x;
         obstacle.y = position.y;
 
         obstacles.push(obstacle);
     };
 
-    //This stays here
+    //TODO this can sometimes cause a "maximum call stack size exceeded" error. debug
     var calculateOpenPosition = function(minX, maxX, minY, maxY) {
         var x = _.random(minX, maxX);
         var y = _.random(minY, maxY);
@@ -142,19 +132,18 @@ $(document).ready(function() {
             return x > (obstacle.x - 50) && x < (obstacle.x + 50) && y > (obstacle.y - 50) && y < (obstacle.y + 50);
         });
 
-        if(foundCollision) {
-            return calculateOpenPosition(minX, maxX, minY, maxY);
-        }
-        else {
+//        if(foundCollision) {
+//            return calculateOpenPosition(minX, maxX, minY, maxY);
+//        }
+//        else {
             return {
                 x: x,
                 y: y
-            }
+//            }
         }
     };
 
     var gameLoop = function() {
-
         ctx.save();
 
         // Retina support
@@ -163,32 +152,24 @@ $(document).ready(function() {
         clearCanvas();
 
         skier.move();
-        if (skier.status === 2 || skier.status === 3 || skier.status === 4)
+        rhino.moveToward(skier);
+
+        if (skier.status === SKIER_LEFT_DOWN || skier.status === SKIER_DOWN || skier.status === SKIER_RIGHT_DOWN)
           placeNewObstacle(skier.status);
 
-//        skier.detectCollision();
+        //Draw elements
+        drawItem(skier);
+        drawItem(rhino);
+        for (ii = 0; ii < obstacles.length - 1; ii++)
+        {
+          drawItem(obstacles[ii]);
+          if (skier.detectCollision(obstacles[ii]))
+            skier.setStatus(SKIER_CRASH);
+        }
 
-//        for(ii = 0; ii < obstacles.length - 1; ii++)
-//          drawSkier(obstacles[ii], gameWidth);
-          drawSkier();
-
-          //TODO Should I unify the draw functions?
-          //i.e.:
-          //draw(skier);
-          //
-          //foreach obstacles
-          //draw(obstacle);
-          //
-          //draw(rhino);
-
-//        for(ii = 0; ii < obstacles.length - 1; ii++)
-//          drawObstacle(obstacles[ii]);
-
-        drawObstacles();
-
+        scrubItems(obstacles[ii]);
 
         ctx.restore();
-
         requestAnimationFrame(gameLoop);
     };
 
@@ -197,7 +178,6 @@ $(document).ready(function() {
         var assetPromises = [];
 
         _.each(assets, function(asset, assetName) {
-//          alert(asset);
             var assetImage = new Image();
             var assetDeferred = new $.Deferred();
 
@@ -209,77 +189,49 @@ $(document).ready(function() {
                 assetDeferred.resolve();
             };
             assetImage.src = asset;
-
             assetPromises.push(assetDeferred.promise());
         });
-
         return $.when.apply($, assetPromises);
     };
 
-    var shouldPlaceObstacle = function() {
-      var shouldPlace = _.random(RANDMIN, RANDMAX);
-      if(shouldPlace > DIFFICULTY) {
-          return false;
-      } else {
-        return true;
-      }
-    }
-
-    //TODO add Konami code mode
     var setupKeyhandler = function() {
         $(window).keydown(function(event) {
             switch(event.which) {
-                case 37: // left            //TODO Define these parameters above. Or, better yet, in a config.js file along with the asset names
-                    if(skier.status === 1) {
-                        skier.x -= skier.speed
+                case 37: // left
+                    if(skier.status === SKIER_LEFT) {
+                        skier.xMap -= skier.speed;
                         if (shouldPlaceObstacle())
                           placeNewObstacle(skier.status);
-                    }
-                    else {
-                        skier.status--;
+                    } else {
+                        skier.setStatus(skier.status - 1);
                     }
                     event.preventDefault();
                     break;
                 case 39: // right
-                    if(skier.status === 5) {
-                        skier.x += skier.speed;
+                    if(skier.status === SKIER_RIGHT) {
+                        skier.xMap += skier.speed;
                         if (shouldPlaceObstacle())
                           placeNewObstacle(skier.status);
-                    }
-                    else {
-                        skier.status++;
+                    } else {
+                        skier.setStatus(skier.status + 1);
                     }
                     event.preventDefault();
                     break;
                 case 38: // up
-                    if(skier.status === 1 || skier.status === 5) {
-                        skier.y -= skier.speed;
+                    skier.yMap -= skier.speed;
+                    if(skier.status === SKIER_LEFT || skier.status === SKIER_RIGHT) {
                         if (shouldPlaceObstacle())
                           placeNewObstacle(6);
                     }
                     event.preventDefault();
                     break;
                 case 40: // down
-                    skierDirection = 3;
+                    skier.setStatus(SKIER_DOWN);
                     event.preventDefault();
                     break;
             }
 
-            //TODO move this stuff to a seperate function?
-            for (ii = 0; ii < konamiLength - 1; ii++)
-            {
-              keySequence[ii] = keySequence[ii + 1];
-            }
-
-            keySequence[konamiLength - 1] = event.which;
-
-            var match = true; //TODO kind of a clunky implementation here
-            for (ii = 0; ii < konamiLength; ii++)
-            {
-              if (!(keySequence[ii] === konami[ii]))
-                match = false;
-            }
-            if (match)
+            if (checkKonami(event.which))
               skier.toggleKonami();
         });
     };
@@ -294,4 +246,41 @@ $(document).ready(function() {
     };
 
     initGame(gameLoop);
+
+    //Removes items outside of viewport from an array of items.
+    var scrubItems = function (items) {
+      var newObstacles = [];
+
+      for (ii = 0; ii < items.length; ii++)
+        if (items[ii].x >= 0 && items[ii].x <= gameWidth && items[ii].y >= 0 && items[ii].y <= gameHeight)  //Is item still within viewport?
+          newObstacles.push(item[ii]);
+
+      items = newObstacles;
+    }
+
+    //Randomizing obstacle placement based on DIFFICULTY
+    var shouldPlaceObstacle = function() {
+      var shouldPlace = _.random(RANDMIN, RANDMAX);
+      if(shouldPlace > DIFFICULTY) {
+          return false;
+      } else {
+        return true;
+      }
+    }
+
+    //Checking key sequence against the Konami Sequence
+    var checkKonami = function(key) {
+      for (ii = 0; ii < konamiLength - 1; ii++)
+        keySequence[ii] = keySequence[ii + 1];
+
+      keySequence[konamiLength - 1] = event.which;
+
+      var match = true; //TODO kind of a clunky implementation here
+      for (ii = 0; ii < konamiLength; ii++)
+      {
+        if (!(keySequence[ii] === konami[ii]))
+          match = false;
+      }
+      return match;
+    }
 });
