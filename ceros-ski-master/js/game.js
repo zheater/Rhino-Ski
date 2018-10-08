@@ -268,6 +268,7 @@ $(document).ready(function() {
         scrubItems(obstacles);
         //Reset skier map
         skier.resetMap();
+        skier.updateSpeed();
 
         ctx.restore();
         requestAnimationFrame(gameLoop);

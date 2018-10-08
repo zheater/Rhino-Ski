@@ -257,4 +257,8 @@ class Skier extends Item {
     this.xMap = 0;
     this.yMap = 0;
   }
+
+  updateSpeed() {
+    this.speed = SKIER_SPEED + SPEED_INCREASE * this.points
+  }
 };
