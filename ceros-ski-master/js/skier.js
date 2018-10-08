@@ -4,63 +4,145 @@ class Skier extends Item {
     super('skierRight');
     this.konamiMode = 0;
     this.points = 0;
-    this.status = 5;
+    this.status = SKIER_RIGHT;
     this.speed = SKIER_SPEED;
     this.lives = SKIER_LIVES;
+    this.eaten = false;
 
-    //Skier stays pegged in the center.
+    //Skier stays pegged in the center of viewport
+    this.moveable = false;
     this.x = (gameWidth - this.imageWidth) / 2;
     this.y = (gameHeight - this.imageHeight) / 2;
     this.xMap = 0;
     this.yMap = 0;
-    this.moveable = false;  //Skier stays pegged in the center of viewport
-  }
-
-  getAssetName () { //TODO write asset name to member variable... There shouldn't be a "get" so much as an "update".
-    var skierAssetName;
-    switch(this.status) {
-        case 0:
-            skierAssetName = 'skierCrash';
-            break;
-        case 1:
-            skierAssetName = 'skierLeft';
-            break;
-        case 2:
-            skierAssetName = 'skierLeftDown';
-            break;
-        case 3:
-            skierAssetName = 'skierDown';
-            break;
-        case 4:
-            skierAssetName = 'skierRightDown';
-            break;
-        case 5:
-            skierAssetName = 'skierRight';
-            break;  //TODO add default condition
-    }
-    return skierAssetName;
+    this.jumping = false;
+    this.animationCount = 0;
   }
 
   move () {
-    var xDelta = 0;
-    var yDelta = 0;
-
     switch(this.status) {
-        case 2:
-            xDelta = (-1) * Math.round(this.speed / 1.4142);	//TODO why is this rounded and case 4 isn't?
-            yDelta = Math.round(this.speed / 1.4142);
-            break;
-        case 3:
-            yDelta += this.speed;
-            break;
-        case 4:
-            xDelta = this.speed / 1.4142;
-            yDelta = this.speed / 1.4142;
-            break;
+            case 0:
+                this.xMap = 0;
+                this.yMap = 0;
+                break;
+            case 2:
+                this.xMap = (-1) * this.speed / 1.4142;
+                this.yMap = this.speed / 1.4142;
+                this.points += this.speed / 1.4142;
+                break;
+            case 3:
+                this.yMap = this.speed;
+                this.points += this.speed;
+                break;
+            case 4:
+                this.xMap = this.speed / 1.4142;
+                this.yMap = this.speed / 1.4142;
+                this.points += this.speed / 1.4142;
+                break;
+            case 6:
+                this.yMap = this.speed;
+                this.points += this.speed;
+                if (this.animationCount >= SKIER_ANIMATION_COUNT) {
+                  this.setStatus(SKIER_JUMP_2);
+                  this.animationCount = 0;
+                } else {
+                  this.animationCount++;
+                }
+                break;
+            case 7:
+                this.yMap = this.speed;
+                this.points += this.speed;
+                if (this.animationCount >= SKIER_ANIMATION_COUNT) {
+                  this.setStatus(SKIER_JUMP_3);
+                  this.animationCount = 0;
+                } else {
+                  this.animationCount++;
+                }
+                break;
+            case 8:
+                this.yMap = this.speed;
+                this.points += this.speed;
+                if (this.animationCount >= SKIER_ANIMATION_COUNT) {
+                  this.setStatus(SKIER_JUMP_4);
+                  this.animationCount = 0;
+                } else {
+                  this.animationCount++;
+                }
+                break;
+            case 9:
+                this.yMap = this.speed;
+                this.points += this.speed;
+                if (this.animationCount >= SKIER_ANIMATION_COUNT) {
+                  this.setStatus(SKIER_JUMP_5);
+                  this.animationCount = 0;
+                } else {
+                  this.animationCount++;
+                }
+                break;
+            case 10:
+                this.yMap = this.speed;
+                this.points += this.speed;
+                this.setStatus(SKIER_DOWN);
+                break;
+            case 11:
+                this.yMap = 0;
+                this.xMap = 0;
+                if (this.animationCount >= SKIER_ANIMATION_COUNT) {
+                  this.setStatus(SKIER_RHINO_LIFT_MOUTH);
+                  this.animationCount = 0;
+                } else {
+                  this.animationCount++;
+                }
+                break;
+            case 12:
+                this.yMap = 0;
+                this.xMap = 0;
+                if (this.animationCount >= SKIER_ANIMATION_COUNT) {
+                  this.setStatus(SKIER_RHINO_EAT_1);
+                  this.animationCount = 0;
+                } else {
+                  this.animationCount++;
+                }
+                break;
+            case 13:
+                this.yMap = 0;
+                this.xMap = 0;
+                if (this.animationCount >= SKIER_ANIMATION_COUNT) {
+                  this.setStatus(SKIER_RHINO_EAT_2);
+                  this.animationCount = 0;
+                } else {
+                  this.animationCount++;
+                }
+                break;
+            case 14:
+                this.yMap = 0;
+                this.xMap = 0;
+                if (this.animationCount >= SKIER_ANIMATION_COUNT) {
+                  this.setStatus(SKIER_RHINO_EAT_3);
+                  this.animationCount = 0;
+                } else {
+                  this.animationCount++;
+                }
+                break;
+            case 15:
+                this.yMap = 0;
+                this.xMap = 0;
+                if (this.animationCount >= SKIER_ANIMATION_COUNT) {
+                  this.setStatus(SKIER_RHINO_EAT_4);
+                  this.animationCount = 0;
+                } else {
+                  this.animationCount++;
+                }
+                break;
+            case 16:
+                //Display points eaten by rhino
+                if (this.lives <= SKIER_DEAD && !this.eaten) {
+                  alert('Score: ' + Math.round(this.points) + ' points!');
+                  this.eaten = true;
+                  window.open('https://www.youtube.com/watch?v=RfmWcJY4II4', '_blank');
+                }
+                break;
     }
-    this.xMap += xDelta;
-    this.yMap += yDelta;
-    this.points += yDelta;
   }
 
   toggleKonami() {
@@ -68,15 +150,15 @@ class Skier extends Item {
 
     if (this.konamiMode)
     {
-      this.speed = 2 * SKIER_SPEED;
+      this.speed = 3 * SKIER_SPEED;
     } else {
       this.speed = SKIER_SPEED;
     }
   }
 
   setStatus(newStatus) {
-    if (newStatus < 0 || newStatus > SKIER_STATUS_COUNT) {
-      console.log('Error: Invalid status provided to Skier setStatus()')
+    if (newStatus < 0 || newStatus >= SKIER_STATUS_COUNT) {
+      console.log("Error: Invalid status'" + newStatus + "' provided to Skier setStatus()");
       return false;
     }
 
@@ -115,6 +197,64 @@ class Skier extends Item {
         case 10:
             this.assetName = 'skierJump5';
             break;
+        case 11:
+            this.assetName = 'rhinoLift';
+            break;
+        case 12:
+            this.assetName = 'rhinoLiftMouthOpen';
+            break;
+        case 13:
+            this.assetName = 'rhinoLiftEat1';
+            break;
+        case 14:
+            this.assetName = 'rhinoLiftEat2';
+            break;
+        case 15:
+            this.assetName = 'rhinoLiftEat3';
+            break;
+        case 16:
+            this.assetName = 'rhinoLiftEat4';
+            break;
     }
+
+    return true;
+  }
+
+  detectCollision (target) {
+  if (typeof target == 'undefined' || !(typeof target.x !== 'undefined' && typeof target.y !== 'undefined' && typeof target.imageWidth !== 'undefined' && typeof target.imageHeight !== 'undefined'))
+  {
+    console.log('Error: Invalid argument provided to detectCollision for ' + this.assetName);
+    return false;
+  }
+
+  if (!target.hittable)
+    return false;
+
+  if (this.konamiMode)  //Invincible
+    return false;
+
+  var itemRect = {
+      left: this.x - this.imageWidth / 2,
+      right: this.x + this.imageWidth / 2,
+      top: this.y - this.imageHeight / 2,
+      bottom: this.y + this.imageHeight / 2
+  };
+
+  var targetRect = {
+      left: target.x - target.imageWidth / 2,
+      right: target.x + target.imageWidth / 2,
+      top: target.y - target.imageHeight / 2,
+      bottom: target.y + target.imageHeight / 2
+  };
+
+  return !( (targetRect.left > itemRect.right ||
+            targetRect.right < itemRect.left) ||
+            (targetRect.top > itemRect.bottom ||
+            targetRect.bottom < itemRect.top));
+  }
+
+  resetMap() {
+    this.xMap = 0;
+    this.yMap = 0;
   }
 };

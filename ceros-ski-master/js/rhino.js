@@ -2,43 +2,28 @@ class Rhino extends Item {
 
   constructor() {
     super('rhino');
-    this.status = 5;
-    this.speed = 1.2 * SKIER_SPEED;
+    this.status = RHINO_SLEEPING;
+    this.speed = SKIER_SPEED / 5;
 
-    //He's fast but he's also fat so he can't turn as fast as you can.
-    this.maxTurn = 1000;  //TODO calibrate this
-    this.x = gameWidth / 40;
-    this.y = gameHeight / 40;
     this.angle = null;
+    this.moveable = false;
   }
 
   moveToward(target) {
     //Calculate direction
-    var angleHolder = Math.atan((this.y - target.y) / (this.x - target.x));
-    if (angleHolder < 0)
-      angleHolder += 2 * 3.1415926;
-//alert(angleHolder);
-//alert('ry: ' + this.y);
-//alert(target.y);
-//alert('rx: ' + this.x);
-//alert(target.x);
-    if (this.angle == null || Math.abs(angleHolder - this.angle) <= this.maxTurn) {
-alert(angleHolder)
-      this.angle = angleHolder;
-    } else if (angleHolder < this.angle) {
-      this.angle -= this.maxTurn;
+    if (this.x == target.x) {
+      if (this.y > target.y)
+        angleHolder = 1 / 2 * 3.1415926;
+      else
+        angleHolder = 3 / 2 * 3.1415926;
     } else {
-      this.angle += this.maxTurn;
+      var angleHolder = Math.atan((this.y - target.y) / (this.x - target.x));
+      if (angleHolder < 0)
+        angleHolder += 2 * 3.1415926;
     }
 
-
-//alert(this.y);
-//alert(target.y);
-//alert(this.x);
-//alert(target.x);
-//alert(angle * 360 / (2 * 3.1415926));
-    //TODO make rhino clickable with this link
-    //HERE I COME  https://www.youtube.com/watch?v=TPQQ5qK-soM
+    //HERE I COME  https://www.youtube.com/watch?v=RfmWcJY4II4
+    this.angle = angleHolder;
     this.x += this.speed * Math.cos(this.angle);
     this.y += this.speed * Math.sin(this.angle);
   }
